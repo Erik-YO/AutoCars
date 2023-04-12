@@ -141,13 +141,18 @@ class CarConstructor(RandomConstructorInterface):
             if generacion:
                 pg.font.quit()
 
+        print(
+            'Max reward:',
+            max(ind.nextRewardIdx for ind in poblacion))
         fits = [
             # Lo lejos que llegan + ~proporcion de tiempo que estan vivos
             # Valoramos que usen menos frames para llegar a las
             # mismas recompensas
             (
-                (ind.nextRewardIdx) + (1 - (aliveFrames / maxIters)) / 2
-                ) if ind.nextRewardIdx > 0 else (aliveFrames / maxIters) / 2
+                (
+                    (ind.nextRewardIdx)  # + (1 - (aliveFrames / maxIters)) / 2
+                ) if ind.nextRewardIdx > 0 else (aliveFrames / maxIters) * 0.9
+                ) * 100 / maxIters
             for ind, aliveFrames in zip(poblacion, aliveIters)]
 
         return fits
@@ -169,6 +174,8 @@ class Entrenador:
     mutationRate: float
     elitismo: int
     ruleta: bool
+    renovacion: int
+
     individuo: Car
 
     def __init__(
@@ -180,7 +187,8 @@ class Entrenador:
             probabCruce: float = 0.6,
             mutationRate: float = 0.01,
             elitismo: int = 0.05,
-            ruleta: bool = True
+            ruleta: bool = True,
+            renovacion: float = 0.05
             ) -> None:
         """
         populationSize: int, Numero de individuos a entrenar
@@ -196,6 +204,7 @@ class Entrenador:
         reservan de una generacion a la siguiente
         ruleta: bool, seleccionar individuos aleatoriamente con probabilidad
         proporcional al fitness
+        renovacion: float, porcentaje de nuevos individuos en cada generacion
         """
 
         if populationSize < 1:
@@ -219,6 +228,10 @@ class Entrenador:
         if elitismo < 0 or elitismo > 1:
             raise ValueError('elitismo debe estar en el rango [0, 1]')
 
+        if renovacion < 0 or renovacion + elitismo > 1:
+            raise ValueError(
+                'renovacion debe estar en el rango [0, 1-elitismo]')
+
         # Listas de control de mejora intergeneracional
         self.list_best_fit_indiv = []
         self.list_fit_med = []
@@ -232,6 +245,11 @@ class Entrenador:
         self.mutationRate = mutationRate
         self.elitismo = ceil(elitismo * populationSize)
         self.ruleta = ruleta
+        self.renovacion = ceil(renovacion * populationSize)
+
+        if self.elitismo + self.renovacion > populationSize:
+            raise ValueError(
+                'renovacion es demasiado grande para esta poblacion')
 
         self.constructor = constructor
 
@@ -260,7 +278,7 @@ class Entrenador:
             print(poblacion[0])
 
         self.mejores = []
-        pobBase = self.populationSize - self.elitismo
+        pobBase = self.populationSize - self.elitismo - self.renovacion
         for generacion in range(self.maxGeneraciones):
             # Calculo de fitness
             poblacionSorted, fits = self.get_fitness_population(
@@ -285,6 +303,8 @@ class Entrenador:
                         elite.append(poblacionSorted[i].copy())
                     i += 1
                 progenitores.extend(elite)
+            if self.renovacion:
+                progenitores.extend(self.createGeneration(self.renovacion))
 
             poblacion = progenitores
 
@@ -332,12 +352,14 @@ class Entrenador:
 
         return self
 
-    def createGeneration(self):
+    def createGeneration(self, n: int = None):
         '''Crea una generacion aleatoria'''
+        if n is None:
+            n = self.populationSize
 
         poblacion = [
             self.constructor.getRandomIndividual()
-            for _ in range(self.populationSize)]
+            for _ in range(n)]
 
         return poblacion
 

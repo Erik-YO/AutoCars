@@ -17,20 +17,21 @@ if len(argv) > 1:
     mejores = [m[0] for m in pkl.loads(data)]
 
 
-circuit = Circuit('./circuito/testimg3.ct')
+circuit = Circuit('./circuito/train1.ct')
 
 minL = 1
 maxL = 2
 layersSize = 10
 
 popSize = 250
-maxGens = 70
+maxGens = 60
 nIterNoChng = 10
 probCruce = 0.2
 probMutac = 0.09
 
 cc = CarConstructor(circuit.startPoint.asTuple(), minL, maxL, layersSize)
-p = Entrenador(cc, popSize, maxGens, nIterNoChng, probCruce, probMutac)
+p = Entrenador(
+    cc, popSize, maxGens, nIterNoChng, probCruce, probMutac, renovacion=0.2)
 
 try:
     p.train(circuit, mejores)
