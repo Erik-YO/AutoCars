@@ -10,6 +10,11 @@ Requiere las bibliotecas:
 - pickle
 - matplotlib
 
+En algunos equipos será necesario usar el comando 
+```export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6```
+para solucionar el error
+```libGL error: MESA-LOADER: failed to open iris```
+
 ```
 python -m pip install pygame
 python -m pip install numpy
