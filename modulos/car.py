@@ -15,6 +15,8 @@ class Car():
     speed: float
     statusDead: bool
     nextRewardIdx: int
+    aliveFrames: int
+    lastRewardFrames: int
 
     RADIUS = 7
 
@@ -37,6 +39,9 @@ class Car():
         self.speed = 0
         self.statusDead = False
         self.nextRewardIdx = 0
+
+        self.aliveFrames = 0
+        self.lastRewardFrames = 0
 
     def checkCollision(self, lines: Union[List[Line], Line]) -> bool:
 
@@ -92,10 +97,13 @@ class Car():
         if rll and self.checkCollision(
                 circuit.reward_lines[self.nextRewardIdx % rll]):
             self.nextRewardIdx += 1
+            self.lastRewardFrames = self.aliveFrames
 
         data = self.getEnvironment(circuit)
         tl, acc, tr = self.think(data)
         self.move(tl, acc, tr)
+
+        self.aliveFrames += 1
 
         return True
 
@@ -114,6 +122,8 @@ class Car():
         c.speed = self.speed
         c.statusDead = self.statusDead
         c.nextRewardIdx = 0
+        c.aliveFrames = self.aliveFrames
+        c.lastRewardFrames = self.lastRewardFrames
 
         c.brain = self.brain.copy()
         c.body = self.body.copy()
@@ -177,11 +187,19 @@ class Car():
     def resetNextReward(self) -> None:
         self.nextRewardIdx = 0
 
+    def resetAliveFrames(self) -> None:
+        self.aliveFrames = 0
+
+    def resetLastRewardFrames(self) -> None:
+        self.lastRewardFrames = 0
+
     def resetAll(self) -> None:
         self.resetBody()
         self.resetStatusDead()
         self.resetSpeed()
         self.resetNextReward()
+        self.resetAliveFrames()
+        self.resetLastRewardFrames()
 
         return
 
@@ -194,7 +212,18 @@ class Car():
         return self
 
     def __repr__(self) -> str:
+        return str(self)
         c = self.__class__.__name__
         lin = len(self.brain.pesos)
         shp = self.body.__class__.__name__
         return f'{c}(shape={shp}, layers={lin})'
+
+    def __str__(self) -> str:
+        s = 'Car(rewards={}, aliveF={}, lastRewardF={}, layers={})'.format(
+            self.nextRewardIdx,
+            self.aliveFrames,
+            self.lastRewardFrames,
+            len(self.brain.pesos)
+        )
+
+        return s

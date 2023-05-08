@@ -1,5 +1,6 @@
 
 from random import randint, random
+from time import sleep
 from typing import Any, List, Tuple
 import pygame as pg
 
@@ -74,8 +75,6 @@ class CarConstructor(RandomConstructorInterface):
                 pg.font.init()
                 fuente = pg.font.SysFont('arial', 20)
 
-        # Numero de "frames" que lleva sobreviviendo cada individuo
-        aliveIters = [0 for _ in poblacion]
         # Numero de "frames" que llevan parados todos los individuos
         speedStopped = 0
         # Numero de individuos con vida
@@ -102,6 +101,9 @@ class CarConstructor(RandomConstructorInterface):
                 pg.display.update()
                 updated = False
 
+                if iters < 2 and DEBUG:
+                    sleep(4)
+
             if show:
                 clock.tick(TRAINING_TICK)
 
@@ -109,11 +111,8 @@ class CarConstructor(RandomConstructorInterface):
                     if event.type == pg.QUIT:
                         run = False
 
-            for i, ind in enumerate(poblacion):  # Actualizacion
-                dead = ind.statusDead
+            for ind in poblacion:  # Actualizacion
                 updated = ind.update(circuito) or updated
-                if dead != ind.statusDead:
-                    aliveIters[i] = iters
 
             if run:
                 aliveIndividuos = sum(  # Cuantos "vivos"
@@ -137,6 +136,8 @@ class CarConstructor(RandomConstructorInterface):
 
         print('Frames:', iters, '/', maxIters)
         if show:
+            if DEBUG:
+                sleep(3)
             pg.display.quit()
             if generacion:
                 pg.font.quit()
@@ -150,10 +151,11 @@ class CarConstructor(RandomConstructorInterface):
             # mismas recompensas
             (
                 (
-                    (ind.nextRewardIdx)  # + (1 - (aliveFrames / maxIters)) / 2
-                ) if ind.nextRewardIdx > 0 else (aliveFrames / maxIters) * 0.9
+                    (ind.nextRewardIdx)  # Frames usados para llegar a la ultima recompensa
+                ) if ind.nextRewardIdx > 0 else (
+                    ind.aliveFrames / maxIters) * 0.9
                 ) * 100 / maxIters
-            for ind, aliveFrames in zip(poblacion, aliveIters)]
+            for ind in poblacion]
 
         return fits
 
