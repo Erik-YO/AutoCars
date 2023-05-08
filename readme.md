@@ -2,6 +2,8 @@
 
 # AutoCars
 
+https://github.com/Erik-YO/AutoCars
+
 Probado con python desde 3.6.4 hasta 3.10.9
 
 Requiere las bibliotecas:
@@ -10,17 +12,17 @@ Requiere las bibliotecas:
 - pickle
 - matplotlib
 
-En algunos equipos será necesario usar el comando 
-```export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6```
-para solucionar el error
-```libGL error: MESA-LOADER: failed to open iris```
-
 ```
 python -m pip install pygame
 python -m pip install numpy
 python -m pip install pickle
 python -m pip install matplotlib
 ```
+
+En algunos equipos será necesario usar el comando:  
+```export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6```  
+para solucionar el error:  
+```libGL error: MESA-LOADER: failed to open iris```
 
 ## Pruebas
 
@@ -31,7 +33,7 @@ python .\train.py
 
 Test:
 ```
-python .\test.py .\best\mejores-1681299667-1layers-97.5.pkl
+python .\test.py .\best\mejores-1681326062-1layers-13.58.pkl
 ```
 
 Perfilado:
@@ -43,28 +45,35 @@ y para ver los resultados:
 python .\showprofile.py
 ```
 
-## Estructura de modulos
+## Estructura de los módulos
 
-### Modulos
+Formato:
+
+nombre_del_modulo: descripción del módulo
+- dependencia_1
+- dependencia_2
+- ...
+
+### Módulos
 
 constants: variables generales
 
-geometry: modulo de geometria, con puntos, lineas y formas
+geometry: módulo de geometria, con puntos, lineas y formas
 - constants
 
-circuit: modulo del circuito, background, lectura y escritura en fichero
+circuit: módulo del circuito, background, lectura y escritura en fichero
 - constants
 - geometry
 
-neuralnetwork: modulo que implementa el funcionamiento de las redes neuronales, su mutación y su cruce
+neuralnetwork: módulo que implementa el funcionamiento de las redes neuronales, su mutación y su cruce
 
-car: 
+car: módulo que implementa el comportamiento de los individuos
 - constants
 - geometry
 - neuralnetwork
 - circuit
 
-entrenador: modulo que implementa la clase de entrenamiento de individuos
+entrenador: módulo que implementa la clase de entrenamiento de individuos
 - constants
 - circuit
 - car
@@ -72,15 +81,15 @@ entrenador: modulo que implementa la clase de entrenamiento de individuos
 
 ### Main
 
-circuit_builder: main con el bucle principal de construccion de circuitos
+circuit_builder: ejecutable con el bucle principal de construccion de circuitos
 - constants
 - geometry
 - circuit
 
-train: main que entrena individuos y guarda el mejor
+train: ejecutable que entrena individuos y guarda el mejor, aquí se definen los hiperparámetros de entrenamiento
 - circuit
 - entrenador
 
-test: main que usa individuos guardados
+test: ejecutable que usa individuos guardados
 - circuit
 - entrenador
